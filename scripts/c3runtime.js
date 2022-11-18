@@ -615,7 +615,7 @@ this._AddPredifinedEase("easeincubic",[{"x":0,"y":0,"sax":.75,"say":0,"eax":0,"e
 this._AddPredifinedEase("easeoutcirc",[{"x":0,"y":0,"sax":.024,"say":.808,"eax":0,"eay":0,"se":true,"ee":false},{"x":1,"y":1,"sax":0,"say":0,"eax":-.25,"eay":0,"se":false,"ee":true}]);this._AddPredifinedEase("easeinoutcirc",[{"x":0,"y":0,"sax":.125,"say":0,"eax":0,"eay":0,"se":true,"ee":false},{"x":.5,"y":.5,"sax":.02,"say":.428,"eax":-.02,"eay":-.428,"se":true,"ee":true},{"x":1,"y":1,"sax":0,"say":0,"eax":-.125,"eay":0,"se":false,"ee":true}]);this._AddPredifinedEase("easeinexpo",[{"x":0,"y":0,"sax":.66,
 "say":0,"eax":0,"eay":0,"se":true,"ee":false},{"x":1,"y":1,"sax":0,"say":0,"eax":-.14,"eay":-1,"se":false,"ee":true}]);this._AddPredifinedEase("easeoutexpo",[{"x":0,"y":0,"sax":.14,"say":1,"eax":0,"eay":0,"se":true,"ee":false},{"x":1,"y":1,"sax":0,"say":0,"eax":-.66,"eay":0,"se":false,"ee":true}]);this._AddPredifinedEase("easeinoutexpo",[{"eax":0,"eay":0,"ee":false,"sax":.345,"say":0,"se":true,"x":0,"y":0},{"eax":-.06,"eay":-.5,"ee":true,"sax":.06,"say":.5,"se":true,"x":.5,"y":.5},{"eax":-.335,"eay":0,
 "ee":true,"sax":0,"say":0,"se":false,"x":1,"y":1}]);this._AddPrivateCustomEase("cubicbezier",this.EaseCubicBezier);this._AddPrivateCustomEase("spline",this.EaseSpline)}static _AddPredifinedEase(name,dataArray_or_function,linear=false){if(typeof dataArray_or_function==="function")Ease._AddEase(name,dataArray_or_function,"predefined");else if(C3.IsArray(dataArray_or_function))if(self.BuiltInTransition){const builtInTransition=C3.New(self.BuiltInTransition,name,linear);builtInTransition.SetFromJson(dataArray_or_function);
-Ease._AddEase(name,(t,sv,dv,tt)=>builtInTransition.Interpolate(t,sv,dv,tt),"predefined");BUILT_IN_TRANSITION_MAP.set(name,builtInTransition)}else{const builtInTransition=C3.New(C3.Transition,[name,dataArray_or_function.map(data=>{return[data["x"],data["y"],data["sax"],data["say"],data["eax"],data["eay"],data["se"],data["ee"]]})]);builtInTransition.MakeLinear(linear);Ease._AddEase(name,(t,sv,dv,tt)=>builtInTransition.Interpolate(t,sv,dv,tt),"predefined")}else throw new Error("unexpected arguments");
+Ease._AddEase(name,(t,sv,dv,tt)=>builtInTransition.Interpolate(t,sv,dv,tt),"predefined");BUILT_IN_TRANSITION_MAP.set(name,builtInTransition)}else{const builtInTransition=C3.New(C3.Transition,[name,dataArray_or_function.map(data=>{return[data["x"],data["y"],data["sax"],data["say"],data["eax"],data["eay"],data["se"],data["ee"]]})],false);builtInTransition.MakeLinear(linear);Ease._AddEase(name,(t,sv,dv,tt)=>builtInTransition.Interpolate(t,sv,dv,tt),"predefined")}else throw new Error("unexpected arguments");
 }static _AddPrivateCustomEase(name,func){Ease._AddEase(name,func,"private")}static AddCustomEase(name,func,project){this._CreateEaseMap();Ease._AddEase(name,func,"custom",project)}static RemoveCustomEase(name,project){if(this.IsNamePredefined(name))return;if([...PRIVATE_EASE_MAP.keys()].includes(name))return;const customEaseMap=CUSTOM_EASE_EDITOR_MAP.get(project);if(customEaseMap)customEaseMap.delete(name)}static _AddEase(name,func,mode,project){switch(mode){case "predefined":{EASE_MAP.set(name,func);
 PREDEFINED_EASE_MAP.set(name,func);break}case "custom":{if(project){if(!CUSTOM_EASE_EDITOR_MAP.has(project))CUSTOM_EASE_EDITOR_MAP.set(project,new Map);const customEaseMap=CUSTOM_EASE_EDITOR_MAP.get(project);customEaseMap.set(name,func)}else CUSTOM_EASE_RUNTIME_MAP.set(name,func);break}case "private":{EASE_MAP.set(name,func);PRIVATE_EASE_MAP.set(name,func);break}default:throw new Error("unexpected ease mode");}}static NoEase(t,b,c,d){return c*t/d+b}static EaseInQuad(t,b,c,d){return c*(t/=d)*t+b}static EaseOutQuad(t,
 b,c,d){return-c*(t/=d)*(t-2)+b}static EaseInOutQuad(t,b,c,d){if((t/=d/2)<1)return c/2*t*t+b;return-c/2*(--t*(t-2)-1)+b}static EaseInCubic(t,b,c,d){return c*(t/=d)*t*t+b}static EaseOutCubic(t,b,c,d){return c*((t=t/d-1)*t*t+1)+b}static EaseInOutCubic(t,b,c,d){if((t/=d/2)<1)return c/2*t*t*t+b;return c/2*((t-=2)*t*t+2)+b}static EaseInQuart(t,b,c,d){return c*(t/=d)*t*t*t+b}static EaseOutQuart(t,b,c,d){return-c*((t=t/d-1)*t*t*t-1)+b}static EaseInOutQuart(t,b,c,d){if((t/=d/2)<1)return c/2*t*t*t*t+b;return-c/
@@ -1927,8 +1927,8 @@ this._propertyTrack.GetTrack();const volumePropertyTrack=track.GetPropertyTrack(
 this._audioTag)}}GetAudioTag(){return this._audioTag}GetVolume(){return this._volume}SetVolume(v){this._volume=v}SetInitialState(){super.SetInitialState();this._pauseTime=NaN;this._audioPlaybackStarted=false}SetResumeState(){super.SetResumeState();const timeline=this._propertyTrack.GetTimeline();const time=timeline.GetTime();this._pauseTime=time-this._startOffsetTime;switch(this._propertyTrack.GetPropertyName()){case "audioSource":{break}case "volume":{this._pauseVolume=this._propertyTrack.GetInterpolatedValue(time);
 break}}this._audioPlaybackStarted=false}Interpolate(time,start,end,setTime,ensureValue){if(!this._sdkInstance)return;switch(this._propertyTrack.GetPropertyName()){case "audioSource":{if(!this._timeline.IsForwardPlayBack())return;if(setTime){if(this._actions)this._actions.Stop.call(this._sdkInstance,this._audioTag);return}if(time<this._startOffsetTime){this._audioPlaybackStarted=false;return}const aPlaybackRate=this._expressions.PlaybackRate.call(this._sdkInstance,this._audioTag);const tPlaybackRate=
 this._timeline.GetPlaybackRate();if(tPlaybackRate!==aPlaybackRate)this._actions.SetPlaybackRate.call(this._sdkInstance,this._audioTag,tPlaybackRate);if(this._audioPlaybackStarted)return;this._audioPlaybackStarted=true;if(isNaN(this._pauseTime)){const thenTime=self["performance"].now();const startDeltaTime=time-this._startOffsetTime;const state=this._sdkInstance.GetAudioContextState();if(state==="suspended"){this._audioPlaybackStarted=false;return}const nowTime=self["performance"].now();const postToDOMDeltaTime=
-(nowTime-thenTime)/1E3;const startPlaybackOffset=startDeltaTime+postToDOMDeltaTime;if(this._actions){let startVolume=this.GetVolume();if(isNaN(startVolume)){this.SetVolume(0);startVolume=0}else this.SetVolume(startVolume);this._actions.Play.call(this._sdkInstance,this._fileArgs,0,startVolume,this._audioTag,startPlaybackOffset)}}else{const startTime=this._pauseTime;this._pauseTime=NaN;const startVolume=this._GetPauseVolume();this._pauseVolume=NaN;const state=this._sdkInstance.GetAudioContextState();
-if(state==="suspended"){this._audioPlaybackStarted=false;return}if(this._actions){this.SetVolume(startVolume);this._actions.Play.call(this._sdkInstance,this._fileArgs,0,startVolume,this._audioTag,startTime)}}break}case "volume":{this._MaybeSetAudioSource();super.Interpolate(time,start,end,setTime,ensureValue)}}}GetInterpolatedValue(time,start,end){if(!this._sdkInstance)return;switch(this._propertyTrack.GetPropertyName()){case "audioSource":{return}case "volume":{this._MaybeSetAudioSource();return super.GetInterpolatedValue(time,
+(nowTime-thenTime)/1E3;const startPlaybackOffset=startDeltaTime+postToDOMDeltaTime;if(this._actions){let startVolume=this.GetVolume();if(isNaN(startVolume)){this.SetVolume(0);startVolume=0}else this.SetVolume(startVolume);this._actions.Play.call(this._sdkInstance,this._fileArgs,0,startVolume,0,this._audioTag,startPlaybackOffset)}}else{const startTime=this._pauseTime;this._pauseTime=NaN;const startVolume=this._GetPauseVolume();this._pauseVolume=NaN;const state=this._sdkInstance.GetAudioContextState();
+if(state==="suspended"){this._audioPlaybackStarted=false;return}if(this._actions){this.SetVolume(startVolume);this._actions.Play.call(this._sdkInstance,this._fileArgs,0,startVolume,0,this._audioTag,startTime)}}break}case "volume":{this._MaybeSetAudioSource();super.Interpolate(time,start,end,setTime,ensureValue)}}}GetInterpolatedValue(time,start,end){if(!this._sdkInstance)return;switch(this._propertyTrack.GetPropertyName()){case "audioSource":{return}case "volume":{this._MaybeSetAudioSource();return super.GetInterpolatedValue(time,
 start,end)}}}Getter(wi,track){if(this._audioSource)return this._audioSource.GetVolume();return 0}Setter(wi,value,track,interpolationAdapter){if(this._audioSource)this._audioSource.SetVolume(this.Getter()+value);if(this._actions&&this._audioSource)this._actions.SetVolume.call(this._sdkInstance,this._audioSource.GetAudioTag(),this._audioSource.GetVolume())}AbsoluteSetter(wi,value,track){if(this._audioSource)this._audioSource.SetVolume(value);if(this._actions&&this._audioSource)this._actions.SetVolume.call(this._sdkInstance,
 this._audioSource.GetAudioTag(),this._audioSource.GetVolume())}DoesRounding(){return true}_SaveToJson(){return{"audioPlaybackStarted":this._audioPlaybackStarted,"audioTag":this._audioTag,"pauseTime":this._pauseTime,"pauseVolume":this._pauseVolume,"volume":this._volume}}_LoadFromJson(o){if(!o)return;this._audioPlaybackStarted=o["audioPlaybackStarted"];this._audioTag=o["audioTag"];this._pauseTime=o["pauseTime"];this._pauseVolume=o["pauseVolume"];this._volume=o["volume"];this._Initialize()}}
 C3.PropertyTrackState.AudioSourceAdapter=AudioSourceAdapter;
@@ -2251,13 +2251,14 @@ o["basic"]}};
 // timelines/transitions/transition.js
 {
 'use strict';const C3=self.C3;const Ease=self.Ease;const NAME=0;const TRANSITION_KEYFRAMES=1;
-C3.Transition=class Transition extends C3.DefendedBase{constructor(data){super();this._name=data[NAME];this._linear=false;this._transitionKeyframes=[];for(const transitionKeyframeData of data[TRANSITION_KEYFRAMES]){const transitionKeyframe=C3.TransitionKeyframe.Create(this,transitionKeyframeData);this._transitionKeyframes.push(transitionKeyframe)}for(let i=0;i<this._transitionKeyframes.length;i++){const current=this._transitionKeyframes[i];current.SetNext(this._transitionKeyframes[i+1])}this._precalculatedSamples=
-new Map;this._transitionKeyframeCache=new Map;this._PreCalcSamples();Ease.AddCustomEase(this._name,(t,sv,dv,tt)=>this.Interpolate(t,sv,dv,tt))}static Create(data){return C3.New(C3.Transition,data)}Release(){for(const transitionKeyframe of this._transitionKeyframes)transitionKeyframe.Release();C3.clearArray(this._transitionKeyframes);this._transitionKeyframes=null;this._precalculatedSamples.clear();this._precalculatedSamples=null;this._transitionKeyframeCache.clear();this._transitionKeyframeCache=
-null}MakeLinear(linear){this._linear=!!linear}GetTransitionKeyFrameAt(x){const transitionKeyframe=this._transitionKeyframeCache.get(x);if(transitionKeyframe)return transitionKeyframe;for(const transitionKeyframe of this._transitionKeyframes)if(transitionKeyframe.GetValueX()===x){this._transitionKeyframeCache.set(x,transitionKeyframe);return transitionKeyframe}}GetFirstTransitionKeyFrameHigherThan(x){for(const transitionKeyframe of this._transitionKeyframes)if(transitionKeyframe.GetValueX()>x)return transitionKeyframe}GetFirstTransitionKeyFrameHigherOrEqualThan(x){for(const transitionKeyframe of this._transitionKeyframes)if(transitionKeyframe.GetValueX()>=
-x)return transitionKeyframe}GetFirstTransitionKeyFrameLowerThan(x){for(let i=this._transitionKeyframes.length-1;i>=0;i--){const transitionKeyframe=this._transitionKeyframes[i];if(transitionKeyframe.GetValueX()<x)return transitionKeyframe}}GetFirstTransitionKeyFrameLowerOrEqualThan(x){for(let i=this._transitionKeyframes.length-1;i>=0;i--){const transitionKeyframe=this._transitionKeyframes[i];if(transitionKeyframe.GetValueX()<=x)return transitionKeyframe}}Interpolate(time,startValue,deltaValue,totalTime){if(this._linear)return Ease.NoEase(time,
-startValue,deltaValue,totalTime);const n=time/totalTime;let start=this.GetFirstTransitionKeyFrameLowerOrEqualThan(n);let end=start.GetNext();if(!end){start=this.GetFirstTransitionKeyFrameLowerThan(n);end=start.GetNext()}const delta=end.GetValueX()-start.GetValueX();const nn=C3.mapToRange(n,start.GetValueX(),end.GetValueX(),0,delta);const startX=start.GetValueX();const startY=start.GetValueY();const anchor1X=start.GetValueX()+start.GetStartAnchorX();const anchor1Y=start.GetValueY()+start.GetStartAnchorY();
-const anchor2X=end.GetValueX()+end.GetEndAnchorX();const anchor2Y=end.GetValueY()+end.GetEndAnchorY();const endX=end.GetValueX();const endY=end.GetValueY();let ret=Ease.GetRuntimeEase("spline")(nn,startX,startY,anchor1X,anchor1Y,anchor2X,anchor2Y,endX,endY,this._precalculatedSamples.get(start));ret+=start.GetValueY();return(1-ret)*startValue+ret*(startValue+deltaValue)}_PreCalcSamples(){this._precalculatedSamples.clear();for(let i=0;i<this._transitionKeyframes.length-1;i++){const transitionKeyframe=
-this._transitionKeyframes[i];if(!transitionKeyframe.GetStartEnable())continue;const start=transitionKeyframe;const end=this._transitionKeyframes[i+1];const startValue=start.GetValueX();const anchor1Value=start.GetValueX()+start.GetStartAnchorX();const anchor2Value=end.GetValueX()+end.GetEndAnchorX();const endValue=end.GetValueX();this._precalculatedSamples.set(start,Ease.GetBezierSamples(startValue,anchor1Value,anchor2Value,endValue))}}};
+C3.Transition=class Transition extends C3.DefendedBase{constructor(data,addCustomEase=true){super();this._name=data[NAME];this._linear=false;this._transitionKeyframes=[];for(const transitionKeyframeData of data[TRANSITION_KEYFRAMES]){const transitionKeyframe=C3.TransitionKeyframe.Create(this,transitionKeyframeData);this._transitionKeyframes.push(transitionKeyframe)}for(let i=0;i<this._transitionKeyframes.length;i++){const current=this._transitionKeyframes[i];current.SetNext(this._transitionKeyframes[i+
+1])}this._precalculatedSamples=new Map;this._transitionKeyframeCache=new Map;this._PreCalcSamples();if(addCustomEase)Ease.AddCustomEase(this._name,(t,sv,dv,tt)=>this.Interpolate(t,sv,dv,tt))}static Create(data){return C3.New(C3.Transition,data)}Release(){for(const transitionKeyframe of this._transitionKeyframes)transitionKeyframe.Release();C3.clearArray(this._transitionKeyframes);this._transitionKeyframes=null;this._precalculatedSamples.clear();this._precalculatedSamples=null;this._transitionKeyframeCache.clear();
+this._transitionKeyframeCache=null}MakeLinear(linear){this._linear=!!linear}GetTransitionKeyFrameAt(x){const transitionKeyframe=this._transitionKeyframeCache.get(x);if(transitionKeyframe)return transitionKeyframe;for(const transitionKeyframe of this._transitionKeyframes)if(transitionKeyframe.GetValueX()===x){this._transitionKeyframeCache.set(x,transitionKeyframe);return transitionKeyframe}}GetFirstTransitionKeyFrameHigherThan(x){for(const transitionKeyframe of this._transitionKeyframes)if(transitionKeyframe.GetValueX()>
+x)return transitionKeyframe}GetFirstTransitionKeyFrameHigherOrEqualThan(x){for(const transitionKeyframe of this._transitionKeyframes)if(transitionKeyframe.GetValueX()>=x)return transitionKeyframe}GetFirstTransitionKeyFrameLowerThan(x){for(let i=this._transitionKeyframes.length-1;i>=0;i--){const transitionKeyframe=this._transitionKeyframes[i];if(transitionKeyframe.GetValueX()<x)return transitionKeyframe}}GetFirstTransitionKeyFrameLowerOrEqualThan(x){for(let i=this._transitionKeyframes.length-1;i>=
+0;i--){const transitionKeyframe=this._transitionKeyframes[i];if(transitionKeyframe.GetValueX()<=x)return transitionKeyframe}}Interpolate(time,startValue,deltaValue,totalTime){if(this._linear)return Ease.NoEase(time,startValue,deltaValue,totalTime);const n=time/totalTime;let start=this.GetFirstTransitionKeyFrameLowerOrEqualThan(n);let end=start.GetNext();if(!end){start=this.GetFirstTransitionKeyFrameLowerThan(n);end=start.GetNext()}const delta=end.GetValueX()-start.GetValueX();const nn=C3.mapToRange(n,
+start.GetValueX(),end.GetValueX(),0,delta);const startX=start.GetValueX();const startY=start.GetValueY();const anchor1X=start.GetValueX()+start.GetStartAnchorX();const anchor1Y=start.GetValueY()+start.GetStartAnchorY();const anchor2X=end.GetValueX()+end.GetEndAnchorX();const anchor2Y=end.GetValueY()+end.GetEndAnchorY();const endX=end.GetValueX();const endY=end.GetValueY();let ret=Ease.GetRuntimeEase("spline")(nn,startX,startY,anchor1X,anchor1Y,anchor2X,anchor2Y,endX,endY,this._precalculatedSamples.get(start));
+ret+=start.GetValueY();return(1-ret)*startValue+ret*(startValue+deltaValue)}_PreCalcSamples(){this._precalculatedSamples.clear();for(let i=0;i<this._transitionKeyframes.length-1;i++){const transitionKeyframe=this._transitionKeyframes[i];if(!transitionKeyframe.GetStartEnable())continue;const start=transitionKeyframe;const end=this._transitionKeyframes[i+1];const startValue=start.GetValueX();const anchor1Value=start.GetValueX()+start.GetStartAnchorX();const anchor2Value=end.GetValueX()+end.GetEndAnchorX();
+const endValue=end.GetValueX();this._precalculatedSamples.set(start,Ease.GetBezierSamples(startValue,anchor1Value,anchor2Value,endValue))}}};
 
 }
 
@@ -3771,42 +3772,9 @@ map.set(this,IBehaviorInstance._GetInitInst().GetSdkInstance())}set isEnabled(e)
 }
 
 {
-'use strict';{const C3=self.C3;C3.Behaviors.bound=class BoundBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}}}{const C3=self.C3;C3.Behaviors.bound.Type=class BoundType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType)}Release(){super.Release()}OnCreate(){}}}
-{const C3=self.C3;const MODE=0;C3.Behaviors.bound.Instance=class BoundInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._mode=0;if(properties)this._mode=properties[MODE];this._StartTicking2()}Release(){super.Release()}SaveToJson(){return{"m":this._mode}}LoadFromJson(o){this._mode=o["m"]}Tick2(){const wi=this._inst.GetWorldInfo();const bbox=wi.GetBoundingBox();const layout=wi.GetLayout();let isChanged=false;if(this._mode===0){if(wi.GetX()<0){wi.SetX(0);
-isChanged=true}if(wi.GetY()<0){wi.SetY(0);isChanged=true}if(wi.GetX()>layout.GetWidth()){wi.SetX(layout.GetWidth());isChanged=true}if(wi.GetY()>layout.GetHeight()){wi.SetY(layout.GetHeight());isChanged=true}}else{if(bbox.getLeft()<0){wi.OffsetX(-bbox.getLeft());isChanged=true}if(bbox.getTop()<0){wi.OffsetY(-bbox.getTop());isChanged=true}if(bbox.getRight()>layout.GetWidth()){wi.OffsetX(-(bbox.getRight()-layout.GetWidth()));isChanged=true}if(bbox.getBottom()>layout.GetHeight()){wi.OffsetY(-(bbox.getBottom()-
-layout.GetHeight()));isChanged=true}}if(isChanged)wi.SetBboxChanged()}GetPropertyValueByIndex(index){switch(index){case MODE:return this._mode}}SetPropertyValueByIndex(index,value){switch(index){case MODE:this._mode=value;break}}}}{const C3=self.C3;C3.Behaviors.bound.Cnds={}}{const C3=self.C3;C3.Behaviors.bound.Acts={}}{const C3=self.C3;C3.Behaviors.bound.Exps={}};
-
-}
-
-{
-'use strict';{const C3=self.C3;C3.Behaviors.Turret=class TurretBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}}}{const C3=self.C3;C3.Behaviors.Turret.Type=class TurretType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType);this._targetTypes=[]}Release(){C3.clearArray(this._targetTypes);super.Release()}OnCreate(){}GetTargetTypes(){return this._targetTypes}}}
-{const C3=self.C3;const C3X=self.C3X;const IBehaviorInstance=self.IBehaviorInstance;const RANGE=0;const RATE_OF_FIRE=1;const ROTATE=2;const ROTATE_SPEED=3;const TARGET_MODE=4;const PREDICTIVE_AIM=5;const PROJECTILE_SPEED=6;const USE_COLLISION_CELLS=7;const ENABLED=8;const tmpRect=C3.New(C3.Rect);const candidates=[];C3.Behaviors.Turret.Instance=class TurretInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._range=300;this._rateOfFire=1;this._isRotateEnabled=
-true;this._rotateSpeed=C3.toRadians(180);this._targetMode=0;this._predictiveAim=false;this._projectileSpeed=500;this._useCollisionCells=true;this._isEnabled=true;this._lastCheckTime=0;this._fireTimeCount=0;this._currentTarget=null;this._loadTargetUid=-1;this._oldTargetX=0;this._oldTargetY=0;this._lastSpeeds=[0,0,0,0];this._speedsCount=0;this._firstTickWithTarget=true;if(properties){this._range=properties[RANGE];this._rateOfFire=properties[RATE_OF_FIRE];this._isRotateEnabled=!!properties[ROTATE];this._rotateSpeed=
-C3.toRadians(properties[ROTATE_SPEED]);this._targetMode=properties[TARGET_MODE];this._predictiveAim=!!properties[PREDICTIVE_AIM];this._projectileSpeed=properties[PROJECTILE_SPEED];this._useCollisionCells=!!properties[USE_COLLISION_CELLS];this._isEnabled=!!properties[ENABLED]}this._fireTimeCount=this._rateOfFire;const rt=this._runtime.Dispatcher();this._disposables=new C3.CompositeDisposable(C3.Disposable.From(rt,"instancedestroy",e=>this._OnInstanceDestroyed(e.instance)),C3.Disposable.From(rt,"afterload",
-e=>this._OnAfterLoad()));if(this._isEnabled)this._StartTicking()}Release(){this._currentTarget=null;super.Release()}_OnAfterLoad(){if(this._loadTargetUid===-1)this._currentTarget=null;else this._currentTarget=this._runtime.GetInstanceByUID(this._loadTargetUid)}_OnInstanceDestroyed(inst){if(this._currentTarget===inst)this._currentTarget=null}_MaybeAcquireTargetInstance(inst){if(this._currentTarget!==inst&&this._inst!==inst&&this.IsInRange(inst)){this._currentTarget=inst;this._OnTargetAcquired();return true}return false}_UnacquireTarget(){this._currentTarget=
-null;this._speedsCount=0;this._firstTickWithTarget=true}_SetRange(r){this._range=r}_GetRange(){return this._range}_SetRateOfFire(r){this._rateOfFire=r}_GetRateOfFire(){return this._rateOfFire}_SetRotateEnabled(r){this._isRotateEnabled=!!r}_IsRotateEnabled(){return this._isRotateEnabled}_SetRotateSpeed(r){this._rotateSpeed=r}_GetRotateSpeed(){return this._rotateSpeed}_SetTargetMode(m){this._targetMode=m}_GetTargetMode(){return this._targetMode}_SetPredictiveAim(p){this._predictiveAim=!!p}_IsPredictiveAim(){return this._predictiveAim}_SetProjectileSpeed(s){this._projectileSpeed=
-s}_GetProjectileSpeed(){return this._projectileSpeed}_SetEnabled(e){this._isEnabled=!!e;if(this._isEnabled)this._StartTicking();else this._StopTicking()}_IsEnabled(){return this._isEnabled}SaveToJson(){return{"r":this._range,"rof":this._rateOfFire,"re":this._isRotateEnabled,"rs":this._rotateSpeed,"tm":this._targetMode,"pa":this._predictiveAim,"ps":this._projectileSpeed,"ucc":this._useCollisionCells,"e":this._isEnabled,"lct":this._lastCheckTime,"ftc":this._fireTimeCount,"t":this._currentTarget?this._currentTarget.GetUID():
--1,"ox":this._oldTargetX,"oy":this._oldTargetY,"ls":this._lastSpeeds,"sc":this._speedsCount,"targs":this.GetSdkType().GetTargetTypes().map(t=>t.GetSID())}}LoadFromJson(o){this._range=o["r"];this._rateOfFire=o["rof"];this._isRotateEnabled=o["re"];this._rotateSpeed=o["rs"];this._targetMode=o["tm"];this._predictiveAim=o["pa"];this._projectileSpeed=o["ps"];this._useCollisionCells=o["ucc"];this._SetEnabled(o["e"]);this._lastCheckTime=o["lct"];this._fireTimeCount=o["ftc"];this._loadTargetUid=o["t"];this._oldTargetX=
-o["ox"];this._oldTargetY=o["oy"];this._lastSpeeds=o["ls"];this._speedsCount=o["sc"];const targetTypes=this.GetSdkType().GetTargetTypes();C3.clearArray(targetTypes);for(const sid of o["targs"]){const objectClass=this._runtime.GetObjectClassBySID(sid);if(objectClass)targetTypes.push(objectClass)}}AddSpeed(s){if(this._speedsCount<4){this._lastSpeeds[this._speedsCount]=s;this._speedsCount++}else{this._lastSpeeds.shift();this._lastSpeeds.push(s)}}GetSpeed(){let ret=0;for(let i=0;i<this._speedsCount;++i)ret+=
-this._lastSpeeds[i];return ret/this._speedsCount}IsInRange(inst){const myWi=this.GetWorldInfo();const otherWi=inst.GetWorldInfo();const dx=otherWi.GetX()-myWi.GetX();const dy=otherWi.GetY()-myWi.GetY();return dx*dx+dy*dy<=this._range*this._range}LookForFirstTarget(){const wi=this.GetWorldInfo();const targetTypes=this.GetSdkType().GetTargetTypes();const collisionEngine=this._runtime.GetCollisionEngine();if(this._useCollisionCells){tmpRect.set(wi.GetX()-this._range,wi.GetY()-this._range,wi.GetX()+this._range,
-wi.GetY()+this._range);collisionEngine.GetObjectClassesCollisionCandidates(null,targetTypes,tmpRect,candidates)}else for(const objectClass of targetTypes)C3.appendArray(candidates,objectClass.GetInstances());for(const rinst of candidates)if(rinst!==this._inst&&this.IsInRange(rinst)){this._currentTarget=rinst;C3.clearArray(candidates);return}C3.clearArray(candidates)}LookForNearestTarget(){const wi=this.GetWorldInfo();const targetTypes=this.GetSdkType().GetTargetTypes();const collisionEngine=this._runtime.GetCollisionEngine();
-const myX=wi.GetX();const myY=wi.GetY();let closest=this._range*this._range;this._currentTarget=null;if(this._useCollisionCells){tmpRect.set(myX-this._range,myY-this._range,myX+this._range,myY+this._range);collisionEngine.GetObjectClassesCollisionCandidates(null,targetTypes,tmpRect,candidates)}else for(const objectClass of targetTypes)C3.appendArray(candidates,objectClass.GetInstances());for(const rinst of candidates){if(rinst===this._inst)continue;const otherWi=rinst.GetWorldInfo();const dx=myX-
-otherWi.GetX();const dy=myY-otherWi.GetY();const dist=dx*dx+dy*dy;if(dist<closest){this._currentTarget=rinst;closest=dist}}C3.clearArray(candidates)}_OnTargetAcquired(){this._speedsCount=0;this._firstTickWithTarget=true;const targetWi=this._currentTarget.GetWorldInfo();this._oldTargetX=targetWi.GetX();this._oldTargetY=targetWi.GetY();this.DispatchScriptEvent("targetacquired",false,{targetInst:this._currentTarget.GetInterfaceClass()});this.Trigger(C3.Behaviors.Turret.Cnds.OnTargetAcquired)}Tick(){if(!this._isEnabled)return;
-const dt=this._runtime.GetDt(this._inst);const nowTime=this._runtime.GetGameTime();const wi=this.GetWorldInfo();if(this._currentTarget&&!this.IsInRange(this._currentTarget)){this._currentTarget=null;this._speedsCount=0;this._firstTickWithTarget=true}if(nowTime>=this._lastCheckTime+.1){this._lastCheckTime=nowTime;if(this._targetMode===0&&!this._currentTarget){this.LookForFirstTarget();if(this._currentTarget)this._OnTargetAcquired()}else if(this._targetMode===1){const oldTarget=this._currentTarget;
-this.LookForNearestTarget();if(this._currentTarget&&this._currentTarget!==oldTarget)this._OnTargetAcquired()}}this._fireTimeCount+=dt;if(this._currentTarget){let targetWi=this._currentTarget.GetWorldInfo();let targetAngle=C3.angleTo(wi.GetX(),wi.GetY(),targetWi.GetX(),targetWi.GetY());if(this._predictiveAim){const Gx=wi.GetX();const Gy=wi.GetY();const Px=targetWi.GetX();const Py=targetWi.GetY();const h=C3.angleTo(Px,Py,this._oldTargetX,this._oldTargetY);if(!this._firstTickWithTarget)this.AddSpeed(C3.distanceTo(Px,
-Py,this._oldTargetX,this._oldTargetY)/dt);const s=this.GetSpeed();const q=Py-Gy;const r=Px-Gx;const w=(s*Math.sin(h)*(Gx-Px)-s*Math.cos(h)*(Gy-Py))/this._projectileSpeed;const a=Math.asin(w/Math.hypot(q,r))-Math.atan2(q,-r)+Math.PI;if(!isNaN(a))targetAngle=a}if(this._isRotateEnabled){wi.SetAngle(C3.angleRotate(wi.GetAngle(),targetAngle,this._rotateSpeed*dt));wi.SetBboxChanged()}if(this._fireTimeCount>=this._rateOfFire&&(!this._isRotateEnabled||C3.toDegrees(C3.angleDiff(wi.GetAngle(),targetAngle))<=
-.1)&&(!this._predictiveAim||this._speedsCount>=4)){this._fireTimeCount-=this._rateOfFire;if(this._fireTimeCount>=this._rateOfFire)this._fireTimeCount=0;this.DispatchScriptEvent("shoot",false,{targetInst:this._currentTarget.GetInterfaceClass()});this.Trigger(C3.Behaviors.Turret.Cnds.OnShoot)}if(this._currentTarget){targetWi=this._currentTarget.GetWorldInfo();this._oldTargetX=targetWi.GetX();this._oldTargetY=targetWi.GetY()}this._firstTickWithTarget=false}if(this._fireTimeCount>this._rateOfFire)this._fireTimeCount=
-this._rateOfFire}GetPropertyValueByIndex(index){switch(index){case RANGE:return this._GetRange();case RATE_OF_FIRE:return this._GetRateOfFire();case ROTATE:return this._IsRotateEnabled();case ROTATE_SPEED:return C3.toDegrees(this._GetRotateSpeed());case TARGET_MODE:return this._GetTargetMode();case PREDICTIVE_AIM:return this._IsPredictiveAim();case PROJECTILE_SPEED:return this._GetProjectileSpeed();case USE_COLLISION_CELLS:return this._useCollisionCells;case ENABLED:return this._IsEnabled()}}SetPropertyValueByIndex(index,
-value){switch(index){case RANGE:this._SetRange(value);break;case RATE_OF_FIRE:this._SetRateOfFire(value);break;case ROTATE:this._SetRotateEnabled(!!value);break;case ROTATE_SPEED:if(!this._IsRotateEnabled())return;this._SetRotateSpeed(C3.toRadians(value));break;case TARGET_MODE:this._SetTargetMode(value);break;case PREDICTIVE_AIM:this._SetPredictiveAim(!!value);break;case PROJECTILE_SPEED:if(!this._IsPredictiveAim())return;this._SetProjectileSpeed(value);break;case USE_COLLISION_CELLS:this._useCollisionCells=
-!!value;break;case ENABLED:this._SetEnabled(value);break}}GetDebuggerProperties(){const prefix="behaviors.turret";return[{title:"$"+this.GetBehaviorType().GetName(),properties:[{name:prefix+".properties.range.name",value:this._GetRange(),onedit:v=>this._SetRange(v)},{name:prefix+".properties.rate-of-fire.name",value:this._GetRateOfFire(),onedit:v=>this._SetRateOfFire(v)},{name:prefix+".properties.rotate-speed.name",value:C3.toDegrees(this._GetRotateSpeed()),onedit:v=>this._SetRotateSpeed(C3.toRadians(v))},
-{name:prefix+".properties.predictive-aim.name",value:this._IsPredictiveAim(),onedit:v=>this._SetPredictiveAim(v)},{name:prefix+".properties.projectile-speed.name",value:this._GetProjectileSpeed(),onedit:v=>this._SetProjectileSpeed(v)},{name:prefix+".debugger.has-target",value:!!this._currentTarget},{name:prefix+".debugger.target-uid",value:this._currentTarget?this._currentTarget.GetUID():0},{name:prefix+".properties.enabled.name",value:this._IsEnabled(),onedit:v=>this._SetEnabled(v)}]}]}GetScriptInterfaceClass(){return self.ITurretBehaviorInstance}};
-const map=new WeakMap;const VALID_TARGET_MODES=["first","nearest"];self.ITurretBehaviorInstance=class ITurretBehaviorInstance extends IBehaviorInstance{constructor(){super();map.set(this,IBehaviorInstance._GetInitInst().GetSdkInstance())}get currentTarget(){const t=map.get(this)._currentTarget;return t?t.GetInterfaceClass():null}set currentTarget(iinst){const inst=map.get(this);if(iinst)inst._MaybeAcquireTargetInstance(inst.GetRuntime()._UnwrapIWorldInstance(iinst));else inst._UnacquireTarget()}get range(){return map.get(this)._GetRange()}set range(r){C3X.RequireFiniteNumber(r);
-map.get(this)._SetRange(r)}get rateOfFire(){return map.get(this)._GetRateOfFire()}set rateOfFire(r){C3X.RequireFiniteNumber(r);map.get(this)._SetRateOfFire(r)}get isRotateEnabled(){return map.get(this)._IsRotateEnabled()}set isRotateEnabled(r){map.get(this)._SetRotateEnabled(!!r)}get rotateSpeed(){return map.get(this)._GetRotateSpeed()}set rotateSpeed(r){C3X.RequireFiniteNumber(r);map.get(this)._SetRotateSpeed(r)}get targetMode(){return VALID_TARGET_MODES[map.get(this)._GetTargetMode()]}set targetMode(str){const m=
-VALID_TARGET_MODES.indexOf(str);if(m===-1)throw new Error("invalid targetMode");map.get(this)._SetTargetMode(m)}get isPredictiveAimEnabled(){return map.get(this)._IsPredictiveAim()}set isPredictiveAimEnabled(p){map.get(this)._SetPredictiveAim(!!p)}get projectileSpeed(){return map.get(this)._GetProjectileSpeed()}set projectileSpeed(s){C3X.RequireFiniteNumber(s);map.get(this)._SetProjectileSpeed(s)}get isEnabled(){return map.get(this)._IsEnabled()}set isEnabled(e){map.get(this)._SetEnabled(e)}}}
-{const C3=self.C3;C3.Behaviors.Turret.Cnds={HasTarget(){return!!this._currentTarget},OnShoot(){return true},OnTargetAcquired(){return true},IsEnabled(){return this._IsEnabled()}}}
-{const C3=self.C3;C3.Behaviors.Turret.Acts={AcquireTarget(objectClass){if(!objectClass)return;const instances=objectClass.GetCurrentSol().GetInstances();for(const inst of instances)if(this._MaybeAcquireTargetInstance(inst))break},AddTarget(objectClass){const targetTypes=this.GetSdkType().GetTargetTypes();if(targetTypes.includes(objectClass))return;for(const t of targetTypes)if(t.IsFamily()&&t.FamilyHasMember(objectClass))return;targetTypes.push(objectClass)},ClearTargets(){C3.clearArray(this.GetSdkType().GetTargetTypes())},
-UnacquireTarget(){this._UnacquireTarget()},SetEnabled(e){this._SetEnabled(e!==0)},SetRange(r){this._SetRange(r)},SetRateOfFire(r){this._SetRateOfFire(r)},SetRotate(r){this._SetRotateEnabled(r!==0)},SetRotateSpeed(r){this._SetRotateSpeed(C3.toRadians(r))},SetTargetMode(m){this._SetTargetMode(m)},SetPredictiveAim(p){this._SetPredictiveAim(p!==0)},SetProjectileSpeed(s){this._SetProjectileSpeed(s)}}}
-{const C3=self.C3;C3.Behaviors.Turret.Exps={TargetUID(){return this._currentTarget?this._currentTarget.GetUID():0},Range(){return this._GetRange()},RateOfFire(){return this._GetRateOfFire()},RotateSpeed(){return C3.toDegrees(this._GetRotateSpeed())}}};
+'use strict';{const C3=self.C3;C3.Behaviors.destroy=class DestroyOutsideLayoutBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}}}{const C3=self.C3;C3.Behaviors.destroy.Type=class DestroyOutsideLayoutType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType)}Release(){super.Release()}OnCreate(){}}}
+{const C3=self.C3;C3.Behaviors.destroy.Instance=class DestroyOutsideLayoutInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._StartTicking()}Release(){super.Release()}Tick(){const wi=this._inst.GetWorldInfo();const bbox=wi.GetBoundingBox();const layout=wi.GetLayout();if(bbox.getRight()<0||bbox.getBottom()<0||bbox.getLeft()>layout.GetWidth()||bbox.getTop()>layout.GetHeight())this._runtime.DestroyInstance(this._inst)}}}
+{const C3=self.C3;C3.Behaviors.destroy.Cnds={}}{const C3=self.C3;C3.Behaviors.destroy.Acts={}}{const C3=self.C3;C3.Behaviors.destroy.Exps={}};
 
 }
 
@@ -3881,9 +3849,28 @@ CurrentNode(){return this._GetCurrentNode()},Speed(){return this._GetSpeed()}}};
 }
 
 {
-'use strict';{const C3=self.C3;C3.Behaviors.destroy=class DestroyOutsideLayoutBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}}}{const C3=self.C3;C3.Behaviors.destroy.Type=class DestroyOutsideLayoutType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType)}Release(){super.Release()}OnCreate(){}}}
-{const C3=self.C3;C3.Behaviors.destroy.Instance=class DestroyOutsideLayoutInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._StartTicking()}Release(){super.Release()}Tick(){const wi=this._inst.GetWorldInfo();const bbox=wi.GetBoundingBox();const layout=wi.GetLayout();if(bbox.getRight()<0||bbox.getBottom()<0||bbox.getLeft()>layout.GetWidth()||bbox.getTop()>layout.GetHeight())this._runtime.DestroyInstance(this._inst)}}}
-{const C3=self.C3;C3.Behaviors.destroy.Cnds={}}{const C3=self.C3;C3.Behaviors.destroy.Acts={}}{const C3=self.C3;C3.Behaviors.destroy.Exps={}};
+'use strict';{const C3=self.C3;C3.Behaviors.LOS=class LOSBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}}}
+{const C3=self.C3;C3.Behaviors.LOS.Type=class LOSType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType);this._obstacleTypes=[]}Release(){C3.clearArray(this._obstacleTypes);super.Release()}OnCreate(){}GetObstacleTypes(){return this._obstacleTypes}FindLOSBehavior(inst){const myType=this.GetBehaviorType();for(const behInst of inst.GetBehaviorInstances())if(behInst.GetBehaviorType()===myType)return behInst.GetSdkInstance();return null}}}
+{const C3=self.C3;const C3X=self.C3X;const IBehaviorInstance=self.IBehaviorInstance;const OBSTACLE_MODE=0;const RANGE=1;const CONE=2;const USE_COLLISION_CELLS=3;const MODE_SOLID=0;const collisionCandidates=[];C3.Behaviors.LOS.Instance=class LOSInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._obstacleMode=0;this._range=1E4;this._cone=C3.toRadians(360);this._useCollisionCells=true;this._ray=new C3.Ray;if(properties){this._obstacleMode=properties[OBSTACLE_MODE];
+this._range=properties[RANGE];this._cone=C3.toRadians(properties[CONE]);this._useCollisionCells=properties[USE_COLLISION_CELLS]}}Release(){super.Release()}SaveToJson(){return{"r":this._range,"c":this._cone,"om":this._obstacleMode,"ucc":this._useCollisionCells,"t":this.GetSdkType().GetObstacleTypes().map(t=>t.GetSID())}}LoadFromJson(o){this._range=o["r"];this._cone=o["c"];this._obstacleMode=o["om"]||0;this._useCollisionCells=!!o["ucc"];const obstacleTypes=this.GetSdkType().GetObstacleTypes();C3.clearArray(obstacleTypes);
+for(const sid of o["t"]){const objectClass=this._runtime.GetObjectClassBySID(sid);if(objectClass)obstacleTypes.push(objectClass)}}HasLOSToInstance(inst,imgPt){const uid=inst.GetUID();const [x,y]=inst.GetImagePoint(imgPt);const hasLOS=this.HasLOSTo(x,y);return hasLOS||this._ray.hitUid===uid}HasLOSTo(x,y){const wi=this.GetWorldInfo();let angle=wi.GetAngle();if(wi.GetWidth()<0)angle+=Math.PI;return this.HasLOSBetweenPositions(wi.GetX(),wi.GetY(),angle,x,y)}HasLOSBetweenPositions(fromX,fromY,angle,toX,
+toY){const range=this._range;if(C3.distanceSquared(fromX,fromY,toX,toY)>range*range)return false;const a=C3.angleTo(fromX,fromY,toX,toY);if(C3.angleDiff(angle,a)>this._cone/2)return false;const ray=this.CastRay(fromX,fromY,toX,toY,this._useCollisionCells);return!ray.DidCollide()}_GetCollisionCandidates(ray,useCollisionCells){if(useCollisionCells){const layer=this.GetWorldInfo().GetLayer();const collisionEngine=this._runtime.GetCollisionEngine();if(this._obstacleMode===MODE_SOLID)collisionEngine.GetSolidCollisionCandidates(layer,
+ray.rect,collisionCandidates);else collisionEngine.GetObjectClassesCollisionCandidates(layer,this._GetObstacleTypes(),ray.rect,collisionCandidates);return collisionCandidates}else if(this._obstacleMode===MODE_SOLID){const solidBehavior=this._runtime.GetSolidBehavior();if(solidBehavior)return solidBehavior.GetInstances();else return collisionCandidates}else{for(const objectClass of this._GetObstacleTypes())C3.appendArray(collisionCandidates,objectClass.GetInstances());return collisionCandidates}}_GetObstacleTypes(){return this.GetSdkType().GetObstacleTypes()}CastRay(fromX,
+fromY,toX,toY,useCollisionCells){const ray=this._ray.Set(fromX,fromY,toX,toY);const candidates=this._GetCollisionCandidates(ray,useCollisionCells);const collisionEngine=this._runtime.GetCollisionEngine();const isSolidMode=this._obstacleMode===MODE_SOLID;const selfInstance=this._inst;for(let i=0,len=candidates.length;i<len;++i){const rinst=candidates[i];if(rinst===selfInstance)continue;if(!isSolidMode||collisionEngine.IsSolidCollisionAllowed(rinst,selfInstance))collisionEngine.TestRayIntersectsInstance(rinst,
+ray)}ray.Complete();C3.clearArray(collisionCandidates);return ray}_GetRay(){return this._ray}_GetRayHitX(){const ray=this._ray;return ray.DidCollide()?ray.hitX:0}_GetRayHitY(){const ray=this._ray;return ray.DidCollide()?ray.hitY:0}_GetRayHitDistance(){const ray=this._ray;return ray.DidCollide()?ray.distance:0}_GetRayHitUID(){const ray=this._ray;return ray.DidCollide()?ray.hitUid:-1}_GetRayNormalX(length){const ray=this._ray;return ray.DidCollide()?ray.hitX+length*ray.normalX:0}_GetRayNormalY(length){const ray=
+this._ray;return ray.DidCollide()?ray.hitY+length*ray.normalY:0}_GetRayNormalAngle(){const ray=this._ray;return ray.DidCollide()?ray.hitNormal:0}_GetRayReflectionX(length){const ray=this._ray;return ray.DidCollide()?ray.hitX+length*ray.reflectionX:0}_GetRayReflectionY(length){const ray=this._ray;return ray.DidCollide()?ray.hitY+length*ray.reflectionY:0}_GetRayReflectionAngle(){const ray=this._ray;return ray.DidCollide()?Math.atan2(ray.reflectionY,ray.reflectionX):0}_SetRange(r){this._range=r}_GetRange(){return this._range}_SetConeOfView(c){this._cone=
+c}_GetConeOfView(){return this._cone}GetPropertyValueByIndex(index){switch(index){case OBSTACLE_MODE:return this._obstacleMode;case RANGE:return this._range;case CONE:return C3.toDegrees(this._cone);case USE_COLLISION_CELLS:return this._useCollisionCells}}SetPropertyValueByIndex(index,value){switch(index){case OBSTACLE_MODE:this._obstacleMode=value;break;case RANGE:this._range=value;break;case CONE:this._cone=C3.toRadians(value);break;case USE_COLLISION_CELLS:this._useCollisionCells=!!value;break}}GetDebuggerProperties(){const prefix=
+"behaviors.los.properties";return[{title:"$"+this.GetBehaviorType().GetName(),properties:[{name:prefix+".range.name",value:this._GetRange(),onedit:v=>this._SetRange(v)},{name:prefix+".cone-of-view.name",value:C3.toDegrees(this._GetConeOfView()),onedit:v=>this._SetConeOfView(C3.toRadians(v))}]}]}GetScriptInterfaceClass(){return self.ILOSBehaviorInstance}};const map=new WeakMap;self.ILOSBehaviorInstance=class ILOSBehaviorInstance extends IBehaviorInstance{constructor(){super();const sdkInst=IBehaviorInstance._GetInitInst().GetSdkInstance();
+map.set(this,sdkInst);this.ray=new self.ILOSBehaviorRay(sdkInst)}set range(r){C3X.RequireFiniteNumber(r);map.get(this)._SetRange(r)}get range(){return map.get(this)._GetRange()}set coneOfView(c){C3X.RequireFiniteNumber(c);map.get(this)._SetConeOfView(c)}get coneOfView(){return map.get(this)._GetConeOfView()}hasLOStoPosition(x,y){C3X.RequireNumber(x);C3X.RequireNumber(y);return map.get(this).HasLOSTo(x,y)}hasLOSBetweenPositions(fromX,fromY,fromAngle,toX,toY){C3X.RequireNumber(fromX);C3X.RequireNumber(fromY);
+C3X.RequireNumber(fromAngle);C3X.RequireNumber(toX);C3X.RequireNumber(toY);return map.get(this).HasLOSBetweenPositions(fromX,fromY,fromAngle,toX,toY)}castRay(fromX,fromY,toX,toY,useCollisionCells=true){C3X.RequireNumber(fromX);C3X.RequireNumber(fromY);C3X.RequireNumber(toX);C3X.RequireNumber(toY);map.get(this).CastRay(fromX,fromY,toX,toY,useCollisionCells);return this.ray}};self.ILOSBehaviorRay=class ILOSBehaviorRay{constructor(sdkInst){map.set(this,sdkInst)}get didCollide(){return map.get(this)._GetRay().DidCollide()}get hitX(){return map.get(this)._GetRayHitX()}get hitY(){return map.get(this)._GetRayHitY()}get hitDistance(){return map.get(this)._GetRayHitDistance()}get hitUid(){return map.get(this)._GetRayHitUID()}getNormalX(length){C3X.RequireFiniteNumber(length);
+return map.get(this)._GetRayNormalX(length)}getNormalY(length){C3X.RequireFiniteNumber(length);return map.get(this)._GetRayNormalY(length)}get normalAngle(){return map.get(this)._GetRayNormalAngle()}getReflectionX(length){C3X.RequireFiniteNumber(length);return map.get(this)._GetRayReflectionX(length)}getReflectionY(length){C3X.RequireFiniteNumber(length);return map.get(this)._GetRayReflectionY(length)}get reflectionAngle(){return map.get(this)._GetRayReflectionAngle()}}}
+{const C3=self.C3;const lToPick=new Set;const rToPick=new Set;C3.Behaviors.LOS.Cnds={HasLOSToPosition(x,y){return this.HasLOSTo(x,y)},RayIntersected(){return this._ray.DidCollide()},HasLOSBetweenPositions(fromX,fromY,fromAngle,toX,toY){return this.HasLOSBetweenPositions(fromX,fromY,C3.toRadians(fromAngle),toX,toY)},HasLOSToObject(objectClass,imgPt){if(!objectClass)return false;const currentCondition=this._runtime.GetCurrentCondition();const isOrBlock=currentCondition.GetEventBlock().IsOrBlock();const runtime=
+currentCondition.GetRuntime();const lsol=currentCondition.GetObjectClass().GetCurrentSol();const rsol=objectClass.GetCurrentSol();let linstances=lsol.GetInstances();let rinstances=rsol.GetInstances();if(lsol.IsSelectAll())C3.clearArray(lsol._GetOwnElseInstances());else if(isOrBlock)if(runtime.IsCurrentConditionFirst()&&!lsol._GetOwnElseInstances().length&&lsol._GetOwnInstances().length)linstances=lsol._GetOwnInstances();else linstances=lsol._GetOwnElseInstances();if(rsol.IsSelectAll())C3.clearArray(rsol._GetOwnElseInstances());
+else if(isOrBlock)if(runtime.IsCurrentConditionFirst()&&!rsol._GetOwnElseInstances().length&&rsol._GetOwnInstances().length)rinstances=rsol._GetOwnInstances();else rinstances=rsol._GetOwnElseInstances();const isInverted=currentCondition.IsInverted();const sdkType=this.GetSdkType();for(const linst of linstances){let pick=false;const losBeh=sdkType.FindLOSBehavior(linst);if(rinstances.length===0){if(isInverted)pick=true}else for(const rinst of rinstances)if(linst!==rinst&&C3.xor(losBeh.HasLOSToInstance(rinst,
+imgPt),isInverted)){pick=true;rToPick.add(rinst)}if(pick)lToPick.add(linst)}if(isOrBlock){if(linstances===lsol._GetOwnElseInstances())lsol.TransferElseInstancesToOwn(lToPick);else{lsol.AddElseInstances(lToPick,linstances);lsol.SetSetPicked(lToPick)}if(rinstances===rsol._GetOwnElseInstances())rsol.TransferElseInstancesToOwn(rToPick);else{rsol.AddElseInstances(rToPick,rinstances);rsol.SetSetPicked(rToPick)}}else{lsol.SetSetPicked(lToPick);rsol.SetSetPicked(rToPick)}lToPick.clear();rToPick.clear();return lsol.HasAnyInstances()}}}
+{const C3=self.C3;C3.Behaviors.LOS.Acts={SetRange(r){this._SetRange(r)},SetCone(c){this._SetConeOfView(C3.toRadians(c))},CastRay(fromX,fromY,toX,toY,useCollisionCells){this.CastRay(fromX,fromY,toX,toY,useCollisionCells)},AddObstacle(objectClass){const obstacleTypes=this.GetSdkType().GetObstacleTypes();if(obstacleTypes.includes(objectClass))return;for(const t of obstacleTypes)if(t.IsFamily()&&t.FamilyHasMember(objectClass))return;obstacleTypes.push(objectClass)},ClearObstacles(){C3.clearArray(this.GetSdkType().GetObstacleTypes())}}}
+{const C3=self.C3;C3.Behaviors.LOS.Exps={Range(){return this._GetRange()},ConeOfView(){return C3.toDegrees(this._GetConeOfView())},HitX(){return this._GetRayHitX()},HitY(){return this._GetRayHitY()},HitDistance(){return this._GetRayHitDistance()},HitUID(){return this._GetRayHitUID()},NormalX(length){return this._GetRayNormalX(length)},NormalY(length){return this._GetRayNormalY(length)},NormalAngle(){return C3.toDegrees(this._GetRayNormalAngle())},ReflectionX(length){return this._GetRayReflectionX(length)},
+ReflectionY(length){return this._GetRayReflectionY(length)},ReflectionAngle(){return C3.toDegrees(this._GetRayReflectionAngle())}}};
 
 }
 
@@ -3922,35 +3909,41 @@ self.C3_GetObjectRefTable = function () {
 		C3.Behaviors.scrollto,
 		C3.Behaviors.Flash,
 		C3.Behaviors.solid,
+		C3.Behaviors.destroy,
 		C3.Plugins.Keyboard,
-		C3.Behaviors.bound,
-		C3.Behaviors.Turret,
 		C3.Behaviors.Anchor,
 		C3.Behaviors.Pathfinding,
+		C3.Behaviors.LOS,
 		C3.Plugins.Text,
-		C3.Behaviors.destroy,
 		C3.Behaviors.Sin,
 		C3.Plugins.Mouse,
 		C3.Plugins.System.Cnds.OnLayoutStart,
 		C3.Plugins.System.Acts.ResetGlobals,
 		C3.Plugins.System.Acts.SetLayerVisible,
+		C3.Plugins.System.Acts.UnloadUnusedTextures,
 		C3.Plugins.System.Cnds.EveryTick,
 		C3.Plugins.Text.Acts.SetText,
 		C3.Plugins.System.Cnds.CompareVar,
 		C3.Plugins.Sprite.Acts.Destroy,
+		C3.Plugins.Keyboard.Cnds.IsKeyDown,
+		C3.Plugins.Sprite.Acts.SetMirrored,
+		C3.Plugins.Sprite.Acts.SetAnim,
+		C3.Plugins.Mouse.Cnds.OnObjectClicked,
+		C3.Plugins.System.Cnds.LayerVisible,
+		C3.Plugins.Sprite.Cnds.OnCollision,
+		C3.Plugins.System.Cnds.IsGroupActive,
 		C3.Plugins.Sprite.Cnds.OnDestroyed,
 		C3.Plugins.System.Acts.Wait,
 		C3.Plugins.System.Acts.RestartLayout,
-		C3.Plugins.Sprite.Cnds.OnCollision,
 		C3.Plugins.System.Acts.AddVar,
-		C3.Plugins.Mouse.Cnds.OnObjectClicked,
-		C3.Plugins.System.Cnds.LayerVisible,
 		C3.Plugins.Sprite.Cnds.IsOutsideLayout,
 		C3.Plugins.System.Acts.SubVar,
 		C3.Behaviors.Flash.Acts.Flash,
 		C3.Plugins.Sprite.Acts.SetSolidCollisionFilter,
 		C3.Plugins.Sprite.Acts.SetCollisions,
-		C3.Plugins.System.Cnds.IsGroupActive,
+		C3.Behaviors.Platform.Cnds.OnStop,
+		C3.Behaviors.Platform.Cnds.IsJumping,
+		C3.Plugins.System.Acts.NextPrevLayout,
 		C3.Plugins.System.Cnds.Every,
 		C3.Behaviors.Pathfinding.Acts.FindPath,
 		C3.Plugins.Sprite.Exps.X,
@@ -3959,19 +3952,13 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Sprite.Acts.SetInstanceVar,
 		C3.Plugins.Sprite.Cnds.CompareInstanceVar,
 		C3.Behaviors.Platform.Acts.SimulateControl,
-		C3.Plugins.Sprite.Acts.SetMirrored,
-		C3.Plugins.Keyboard.Cnds.IsKeyDown,
-		C3.Plugins.Sprite.Acts.SetAnim,
+		C3.Behaviors.LOS.Cnds.HasLOSToObject,
 		C3.Behaviors.Pathfinding.Acts.SetEnabled,
-		C3.Behaviors.Platform.Cnds.OnStop,
-		C3.Behaviors.Platform.Cnds.IsJumping,
 		C3.Behaviors.Pathfinding.Cnds.OnPathFound,
 		C3.Behaviors.Pathfinding.Acts.StartMoving,
 		C3.Behaviors.Pathfinding.Cnds.OnFailedToFindPath,
 		C3.Plugins.Text.Cnds.CompareText,
 		C3.Plugins.Text.Acts.Destroy,
-		C3.Plugins.System.Acts.UnloadUnusedTextures,
-		C3.Plugins.System.Acts.NextPrevLayout,
 		C3.Plugins.Sprite.Acts.SetAnimFrame,
 		C3.Plugins.Sprite.Acts.AddInstanceVar,
 		C3.Plugins.System.Acts.GoToLayout
@@ -3984,15 +3971,14 @@ self.C3_JsPropNameTable = [
 	{Parpadeo: 0},
 	{Player: 0},
 	{Sólido: 0},
+	{DestruirFueraDeLaEscena: 0},
 	{piso: 0},
 	{tec: 0},
-	{RestringidoALaEscena: 0},
-	{Torreta: 0},
-	{enemigo: 0},
 	{Sprite: 0},
 	{Ancla: 0},
 	{Vida: 0},
 	{Buscarutas: 0},
+	{LíneaDeVisión: 0},
 	{Paloma: 0},
 	{Vidas: 0},
 	{CarnetColect: 0},
@@ -4012,7 +3998,6 @@ self.C3_JsPropNameTable = [
 	{Seno2: 0},
 	{chicle: 0},
 	{Sprite2: 0},
-	{FondoEnMosaico: 0},
 	{Puerta: 0},
 	{Meta: 0},
 	{premioPapas: 0},
@@ -4023,6 +4008,7 @@ self.C3_JsPropNameTable = [
 	{flecha: 0},
 	{msg2: 0},
 	{Reiniciar: 0},
+	{Sprite3: 0},
 	{NumeroCarnets: 0},
 	{Vidajugador: 0},
 	{scene: 0},
@@ -4133,12 +4119,16 @@ self.C3_ExpressionFuncs = [
 			return () => and(v0.GetValue(), "/5");
 		},
 		() => 0,
+		() => "Corriendo",
+		() => "Player",
 		() => 2,
 		() => 1,
 		() => 5,
 		() => 0.2,
 		() => 0.1,
 		() => "Piso",
+		() => "Quieto",
+		() => "Salto",
 		() => "Sistema",
 		p => {
 			const n0 = p._GetNode(0);
@@ -4151,9 +4141,7 @@ self.C3_ExpressionFuncs = [
 		() => "Enemigos",
 		() => "Derecha",
 		() => "Izquierda",
-		() => "Corriendo",
-		() => "Quieto",
-		() => "Salto",
+		() => 1.5,
 		p => {
 			const n0 = p._GetNode(0);
 			return () => (n0.ExpObject() + 0.1);
