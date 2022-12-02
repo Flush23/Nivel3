@@ -4059,7 +4059,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.System.Cnds.EveryTick,
 		C3.Plugins.Text.Acts.SetText,
 		C3.Plugins.Sprite.Acts.Destroy,
-		C3.Plugins.Audio.Acts.Stop,
 		C3.Plugins.System.Cnds.Every,
 		C3.Behaviors.Pathfinding.Acts.FindPath,
 		C3.Plugins.Sprite.Exps.X,
@@ -4263,8 +4262,6 @@ self.C3_ExpressionFuncs = [
 			const v0 = p._GetNode(0).GetVar();
 			return () => and(v0.GetValue(), "/5");
 		},
-		() => -10,
-		() => "",
 		() => 0.1,
 		p => {
 			const n0 = p._GetNode(0);
@@ -4278,6 +4275,8 @@ self.C3_ExpressionFuncs = [
 		() => "Controles",
 		() => "Corriendo",
 		() => "Player",
+		() => -10,
+		() => "",
 		() => 2,
 		() => 1,
 		() => 5,
